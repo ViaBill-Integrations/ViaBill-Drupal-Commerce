@@ -1,0 +1,9 @@
+name: 'ViaBill Payments'
+type: module
+description: 'Provides a ViaBill Payments gateway integration for Drupal Commerce.'
+package: 'Commerce (Payment)'
+core_version_requirement: ^9 || ^10
+# Commerce dependencies.
+dependencies:
+  - drupal:commerce
+  - commerce_log
