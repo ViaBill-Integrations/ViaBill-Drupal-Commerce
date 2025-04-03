@@ -6,6 +6,9 @@ use Drupal\commerce_payment\PluginForm\PaymentGatewayFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_price\Price;
 
+/**
+ * Class for generating the capture button and functionality.
+ */
 class CapturePaymentForm extends PaymentGatewayFormBase {
 
   /**
@@ -13,8 +16,8 @@ class CapturePaymentForm extends PaymentGatewayFormBase {
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     // Remove this line that's causing the error (line 15):
-    // $form = parent::buildConfigurationForm($form, $form_state);
-    
+    // $form = parent::buildConfigurationForm($form, $form_state);.
+
     /** @var \Drupal\commerce_payment\Entity\PaymentInterface $payment */
     $payment = $this->entity;
     $amount = $payment->getAmount();
@@ -41,4 +44,5 @@ class CapturePaymentForm extends PaymentGatewayFormBase {
     $amount = Price::fromArray($values['amount']);
     $payment_gateway_plugin->capturePayment($payment, $amount);
   }
+
 }

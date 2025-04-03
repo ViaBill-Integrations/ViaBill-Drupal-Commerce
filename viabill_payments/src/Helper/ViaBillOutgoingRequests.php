@@ -2,30 +2,26 @@
 
 namespace Drupal\viabill_payments\Helper;
 
-use Drupal;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
-use Drupal\viabill_payments\Helper\ViaBillHelper;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-
 
 /**
- * Provides static methods to send requests to the ViaBill API using Drupal's Guzzle client.
+ * Provides static methods to send requests to the ViaBill API.
  */
 class ViaBillOutgoingRequests {
 
   /**
    * API Test mode base URL.
    */
-  private const TEST_BASE_URL = 'https://secure-test.viabill.com';
+  private const TEST_BASE_URL = 'https://secure.viabill.com';
 
   /**
    * API Live mode base URL.
    */
-  private const PROD_BASE_URL = 'https://secure-test.viabill.com';
+  private const PROD_BASE_URL = 'https://secure.viabill.com';
 
   /**
-   * Sends a GET or POST request to the ViaBill endpoint, allowing redirects by default.
+   * Sends a GET or POST request to the ViaBill endpoints.
    *
    * @param string $endPoint
    *   The endpoint path (e.g. '/api/checkout').
@@ -43,11 +39,11 @@ class ViaBillOutgoingRequests {
    * @return array|false
    *   An array containing request and response details, or FALSE on exception.
    */
-  public static function request(string $endPoint, string $method = 'GET', array $data = [], bool $testMode = false, array $extraHeaders = [], bool $manual = false) {
+  public static function request(string $endPoint, string $method = 'GET', array $data = [], bool $testMode = FALSE, array $extraHeaders = [], bool $manual = FALSE) {
     $baseUrl = $testMode ? self::TEST_BASE_URL : self::PROD_BASE_URL;
     $requestUrl = self::buildRequestUrl($baseUrl, $endPoint);
-    
-    $helper = new ViaBillHelper();    
+
+    $helper = new ViaBillHelper();
 
     // Merge default and extra headers.
     $headers = [
@@ -63,7 +59,7 @@ class ViaBillOutgoingRequests {
     $client = \Drupal::httpClient();
 
     // Prepare response container.
-    $response = null;    
+    $response = NULL;
 
     try {
       if (strtoupper($method) === 'GET') {
@@ -81,17 +77,17 @@ class ViaBillOutgoingRequests {
       else {
         // Unsupported method from your original code viewpoint.
         // You could extend this for PUT/DELETE if needed.
-        return false;
+        return FALSE;
       }
     }
     catch (ClientException $e) {
       // Log or handle the exception. Return false to indicate failure.
-      $helper->log('ClientException: '.$e->getMessage(), 'error');
-      return false;
+      $helper->log('ClientException: ' . $e->getMessage(), 'error');
+      return FALSE;
     }
     catch (RequestException $e) {
-      $helper->log('RequestException: '.$e->getMessage(), 'error');        
-      return false;
+      $helper->log('RequestException: ' . $e->getMessage(), 'error');
+      return FALSE;
     }
 
     // Build the output array.
@@ -134,12 +130,12 @@ class ViaBillOutgoingRequests {
    * @return array|false
    *   The response array, or FALSE on failure.
    */
-  public static function requestWithoutRedirect(string $endPoint, string $method = 'POST', array $data = [], bool $testMode = false) {
+  public static function requestWithoutRedirect(string $endPoint, string $method = 'POST', array $data = [], bool $testMode = FALSE) {
     $baseUrl = $testMode ? self::TEST_BASE_URL : self::PROD_BASE_URL;
     $requestUrl = self::buildRequestUrl($baseUrl, $endPoint);
 
-    $helper = new ViaBillHelper();   
-    
+    $helper = new ViaBillHelper();
+
     $headers = [
       'Accept'           => '*/*',
       'Accept-Encoding'  => 'gzip, deflate',
@@ -153,18 +149,18 @@ class ViaBillOutgoingRequests {
 
     try {
       $response = $client->request($method, $requestUrl, [
-        'allow_redirects' => false,
+        'allow_redirects' => FALSE,
         'headers'         => $headers,
         'form_params'     => $data,
       ]);
     }
-    catch (ClientException $e) {      
-      $helper->log('ClientException: '.$e->getMessage(), 'error');
-      return false;
+    catch (ClientException $e) {
+      $helper->log('ClientException: ' . $e->getMessage(), 'error');
+      return FALSE;
     }
     catch (RequestException $e) {
-      $helper->log('RequestException: '.$e->getMessage(), 'error');      
-      return false;
+      $helper->log('RequestException: ' . $e->getMessage(), 'error');
+      return FALSE;
     }
 
     $output = [
@@ -194,9 +190,9 @@ class ViaBillOutgoingRequests {
    * Constructs a complete request URL from base URL and endpoint.
    *
    * @param string $baseUrl
-   *   The base URL, e.g. https://secure.viabill.com
+   *   The base URL, e.g. https://secure.viabill.com.
    * @param string $endPoint
-   *   The endpoint, e.g. /api/checkout
+   *   The endpoint, e.g. /api/checkout.
    *
    * @return string
    *   The full URL, e.g. https://secure.viabill.com/api/checkout

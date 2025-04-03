@@ -7,10 +7,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\viabill_payments\Helper\ViaBillHelper;
 use Drupal\viabill_payments\Helper\ViaBillGateway;
-use Drupal\viabill_payments\Helper\ViaBillConstants;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a login form for merchants to obtain their ViaBill credentials.
@@ -40,7 +36,8 @@ class ViaBillLoginForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
 
-    // If we already have the keys, show them or let the merchant re-login if needed.
+    // If we already have the keys, show them
+    // or let the merchant re-login if needed.
     $config = $this->config('viabill_payments.settings');
     $existing_api_key = $config->get('api_key') ?? '';
     $existing_api_secret = $config->get('api_secret') ?? '';
@@ -51,10 +48,9 @@ class ViaBillLoginForm extends ConfigFormBase {
     ];
 
     // Change the default "Save configuration" text to "Login".
-	  $form['actions']['submit']['#value'] = $this->t('Login');
+    $form['actions']['submit']['#value'] = $this->t('Login');
 
-    // Login Form
-
+    // Login Form.
     $form['email'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Email'),
@@ -69,7 +65,7 @@ class ViaBillLoginForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    return $form;    
+    return $form;
   }
 
   /**
@@ -97,58 +93,62 @@ class ViaBillLoginForm extends ConfigFormBase {
 
     $email = $form_state->getValue('email');
     $password = $form_state->getValue('password');
-    
+
     $login_data = [
-        'email'    => $form_state->getValue('email'),
-        'password' => $form_state->getValue('password'),
+      'email'    => $form_state->getValue('email'),
+      'password' => $form_state->getValue('password'),
     ];
 
-    $error_msg = null;
-    $response =  $this->login($login_data, $error_msg);
+    $error_msg = NULL;
+    $response = $this->login($login_data, $error_msg);
 
-    if (empty($error_msg)) {         
-        $this->config('viabill_payments.settings')        
+    if (empty($error_msg)) {
+      $this->config('viabill_payments.settings')
         ->set('api_key', $response['key'])
         ->set('api_secret', $response['secret'])
         ->set('viabill_pricetag', $response['pricetagScript'])
         ->set('viabill_email', $email)
-        ->save();       
-        
-        // Also update the payment gateway plugin configuration
-        $payment_gateway_storage = \Drupal::entityTypeManager()->getStorage('commerce_payment_gateway');
-        $payment_gateway = $payment_gateway_storage->load('viabill_payments');
-        
-        if ($payment_gateway) {
-            $configuration = $payment_gateway->getPlugin()->getConfiguration();
-            $configuration['api_key'] = $response['key'];
-            $configuration['api_secret'] = $response['secret'];
-            $configuration['viabill_pricetag'] = $response['pricetagScript'];            
-            
-            $payment_gateway->setPluginConfiguration($configuration);
-            $payment_gateway->save();
-        }
+        ->save();
 
-        $this->messenger()->addStatus($this->t('Successfully logged in and obtained ViaBill credentials.'));
-    } else {
-        // Use a placeholder for the error message
-        $this->messenger()->addStatus($this->t('Login failed: @error', ['@error' => $error_msg]));        
+      // Also update the payment gateway plugin configuration.
+      $payment_gateway_storage = \Drupal::entityTypeManager()->getStorage('commerce_payment_gateway');
+      $payment_gateway = $payment_gateway_storage->load('viabill_payments');
+
+      if ($payment_gateway) {
+        $configuration = $payment_gateway->getPlugin()->getConfiguration();
+        $configuration['api_key'] = $response['key'];
+        $configuration['api_secret'] = $response['secret'];
+        $configuration['viabill_pricetag'] = $response['pricetagScript'];
+
+        $payment_gateway->setPluginConfiguration($configuration);
+        $payment_gateway->save();
+      }
+
+      $this->messenger()->addStatus($this->t('Successfully logged in and obtained ViaBill credentials.'));
     }
-    
-    // Redirect to ViaBill Payments gateway configuration page  
+    else {
+      // Use a placeholder for the error message.
+      $this->messenger()->addStatus($this->t('Login failed: @error', ['@error' => $error_msg]));
+    }
+
+    // Redirect to ViaBill Payments gateway configuration page.
     $form_state->setRedirectUrl(Url::fromRoute('entity.commerce_payment_gateway.edit_form', ['commerce_payment_gateway' => 'viabill_payments']));
   }
-  
+
+  /**
+   * Login merchant (ViaBill Account)
+   */
   protected function login($login_data, &$error_msg) {
     $gateway = new ViaBillGateway();
     $helper = new ViaBillHelper();
 
     $response = $gateway->loginViabillUser($login_data);
     if (!empty($response['error'])) {
-        $error_msg = $response['error'];
-        return false;
+      $error_msg = $response['error'];
+      return FALSE;
     }
 
-    return $response;    
-  }  
+    return $response;
+  }
 
 }
