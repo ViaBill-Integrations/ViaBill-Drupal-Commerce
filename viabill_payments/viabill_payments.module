@@ -343,7 +343,7 @@ function viabill_payments_form_views_form_commerce_cart_form_default_alter(&$for
       '#type' => 'markup',
       '#markup' => '<div class="viabill-pricetag-cart-wrapper ' .
       $alignment_wrapper_class . '"><div class="viabill-pricetag" ' .
-      $data_attributes . ' ' . $div_style . '></div>' .
+      $data_attributes . '></div>' .
       $viabill_pricetag_script . '</div>',
       '#allowed_tags' => ['div', 'script', 'iframe'],
     // Show at the top of the form.
