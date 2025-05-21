@@ -101,8 +101,8 @@ class ViaBillPaymentsForm extends BasePaymentOffsiteForm {
         'cancel_url' => $cancel_url,
         'callback_url' => $callback_url,
         'test' => $helper->getFormattedTestMode(),
-        // 'customParams' => json_encode($customer_info),
-        'cartParams' => (empty($cart_info)) ? '' : json_encode($cart_info),
+        'customParams' => $customer_info, // not json_encode(...)
+        // 'cartParams' => (empty($cart_info)) ? '' : json_encode($cart_info),
         'md5check' => $md5check,
         'tbyb' => $helper->getFormattedTbyb(),
         'platform' => $helper->getViaBillApiPlatform(),

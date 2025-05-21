@@ -64,43 +64,45 @@ class ViaBillHelper {
   /**
    * Constructs a new ViaBillHelper.
    */
-  public function __construct() {
-    // Retrieve gateway plugin + configuration.
-    $configuration = \Drupal::config('commerce_payment.commerce_payment_gateway.viabill_payments')->get();
+  public function __construct() {    
+    $this->loadDefaultValues();  
 
     $payment_gateway_storage = \Drupal::entityTypeManager()->getStorage('commerce_payment_gateway');
     // 'viabill_payments' must match the Payment Gateway entity ID,
     // not just the plugin ID.
     $gateway_entity = $payment_gateway_storage->load('viabill_payments');
-    if ($gateway_entity instanceof PaymentGatewayInterface) {
-      $plugin = $gateway_entity->getPlugin();
-      // 'test' or 'live'
-      $mode = $plugin->getMode();
-      if ($mode === 'test') {
-        // Test mode logic.
-        $this->testMode = ViaBillConstants::TEST_MODE_ON;
-      }
-      else {
-        // Live mode logic.
-        $this->testMode = ViaBillConstants::TEST_MODE_OFF;
+    if (!empty($gateway_entity)) {
+      if ($gateway_entity instanceof PaymentGatewayInterface) {
+        $plugin = $gateway_entity->getPlugin();
+        // 'test' or 'live'
+        $mode = $plugin->getMode();
+        if ($mode === 'test') {
+          // Test mode logic.
+          $this->testMode = ViaBillConstants::TEST_MODE_ON;
+        }
+        else {
+          // Live mode logic.
+          $this->testMode = ViaBillConstants::TEST_MODE_OFF;
+        }
+
+        $configuration = $plugin->getConfiguration();
+        if (!empty($configuration)) {
+          $this->apiKey = $configuration['api_key'] ?? '';
+          $this->apiSecret = $configuration['api_secret'] ?? '';
+          $this->priceTagScript = $configuration['viabill_pricetag'] ?? '';
+          $this->transactionType = $configuration['transaction_type'];
+        }
       }
     }
+  }
 
+  public function loadDefaultValues() {
+    $this->apiKey = '';
+    $this->apiSecret = '';
+    $this->priceTagScript = '';
+    $this->transactionType = '';
+    $this->testMode = ViaBillConstants::TEST_MODE_ON;
     $this->tbyb = ViaBillConstants::TBYB_OFF;
-
-    $payment_gateway_storage = \Drupal::entityTypeManager()->getStorage('commerce_payment_gateway');
-    /** @var \Drupal\commerce_payment\Entity\PaymentGatewayInterface $gateway */
-    $gateway_entity = $payment_gateway_storage->load('viabill_payments');
-    if ($gateway_entity instanceof PaymentGatewayInterface) {
-      $plugin = $gateway_entity->getPlugin();
-      $configuration = $plugin->getConfiguration();
-      if (!empty($configuration)) {
-        $this->apiKey = $configuration['api_key'] ?? '';
-        $this->apiSecret = $configuration['api_secret'] ?? '';
-        $this->priceTagScript = $configuration['viabill_pricetag'] ?? '';
-        $this->transactionType = $configuration['transaction_type'];
-      }
-    }
   }
 
   /**

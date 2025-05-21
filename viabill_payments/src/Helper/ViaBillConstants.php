@@ -8,7 +8,7 @@ namespace Drupal\viabill_payments\Helper;
 final class ViaBillConstants {
 
   // Should be drupal.
-  public const AFFILIATE = 'woocommerce';
+  public const AFFILIATE = 'drupal';
   public const TRANSACTION_TYPE_AUTHORIZE_ONLY = 'authorize_only';
   public const TRANSACTION_TYPE_AUTHORIZE_CAPTURE = 'authorize_capture';
   public const TEST_MODE_ON = 'true';
